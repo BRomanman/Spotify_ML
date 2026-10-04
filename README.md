@@ -85,8 +85,15 @@ Spotify_eva2/
 │   ├── main.md
 │   └── requirements.txt
 │
+├── Informe_Tecnico_EP2_Spotify.md
+│
 ├── .gitignore
 └── README.md
+
+El informe tecnico (`Informe_Tecnico_EP2_Spotify.md`) es el entregable principal de la EP2: documenta,
+en un solo archivo Markdown reproducible, el problema de negocio, objetivos, KPIs, fuentes de datos,
+preparacion/EDA, modelado (supervisado y no supervisado), evaluacion/interpretacion de resultados,
+etica y la metodologia CRISP-DM aplicada.
 
 Flujo del proyecto
 
@@ -154,6 +161,10 @@ Se consideran actividades como:
 
     Identificacion de patrones y relaciones.
 
+El dataset tiene 24.259 `track_id` repetidos (21.3%) porque una misma cancion puede pertenecer a varios
+generos. La preparacion deja una sola fila por cancion para evitar fuga de datos entre train y test; la
+justificacion completa de este criterio esta documentada en la seccion 8.1 del propio notebook.
+
 2. Modelizacion
 
 Archivo:
@@ -179,6 +190,12 @@ Se consideran:
     Reduccion de dimensionalidad.
 
     Evaluacion de resultados.
+
+Se comparan 2 modelos supervisados de regresion (Regresion Lineal y Random Forest) y se aplica K-Means
+como tecnica no supervisada. El numero de clusters (K=5) se valida cuantitativamente con silhouette score:
+el score favorece K=3 (0.251) por sobre K=5 (0.166), pero se mantiene K=5 por interpretabilidad de negocio
+(clusters mas diferenciables); el detalle de esta decision esta en el notebook y en el informe tecnico.
+Los modelos entrenados quedan persistidos en `output/Modelos/*.joblib` para su reutilizacion.
 
 Codigo fuente
 
@@ -226,9 +243,14 @@ Los graficos generados se guardan en:
 
 output/Graficos/
 
-Los modelos entrenados pueden almacenarse en:
+Los modelos entrenados se guardan en:
 
 output/Modelos/
+├── regresion_lineal.joblib
+├── random_forest.joblib
+├── metricas_modelos.csv
+├── perfil_clusters.csv
+└── silhouette_scores.csv
 
 Tecnologias utilizadas
 
