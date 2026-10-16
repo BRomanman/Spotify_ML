@@ -1,0 +1,23 @@
+kpi,escenario,valor,unidad,explicacion
+Canciones con popularidad 0,dataset original,16020.0,canciones,Canciones del CSV original sin ninguna popularidad registrada
+% de ceros,dataset original,14.05,%,Proporcion de ceros antes de limpiar
+Canciones con popularidad 0,tras deduplicar,5425.0,canciones,Ceros que quedan al dejar una fila por cancion
+% de ceros,tras deduplicar,6.7,%,Proporcion de ceros en el conjunto de trabajo
+Canciones que se excluyen al entrenar sin ceros,entrenamiento,4348.0,canciones,Ceros que se quitan del conjunto de entrenamiento
+% del entrenamiento que se descarta,entrenamiento,6.72,%,Costo en datos de entrenar sin ceros
+Error promedio (MAE),con ceros / test completo,10.31,puntos (0-100),Cuantos puntos de popularidad se equivoca en promedio
+Canciones con error <= 10 puntos,con ceros / test completo,64.23,%,"De cada 100 canciones, cuantas se predicen con error pequeno"
+Exitos capturados en el top 20% del modelo,con ceros / test completo,54.34,%,"De las 20% de canciones que el modelo pone primero, que % son exitos reales (20% al azar)"
+Mejora sobre el azar (lift),con ceros / test completo,2.72,veces,Cuantas veces mejor que elegir al azar
+Error promedio (MAE),con ceros / test sin ceros,9.21,puntos (0-100),Cuantos puntos de popularidad se equivoca en promedio
+Canciones con error <= 10 puntos,con ceros / test sin ceros,66.9,%,"De cada 100 canciones, cuantas se predicen con error pequeno"
+Exitos capturados en el top 20% del modelo,con ceros / test sin ceros,53.97,%,"De las 20% de canciones que el modelo pone primero, que % son exitos reales (20% al azar)"
+Mejora sobre el azar (lift),con ceros / test sin ceros,2.7,veces,Cuantas veces mejor que elegir al azar
+Error promedio (MAE),sin ceros / test sin ceros,8.74,puntos (0-100),Cuantos puntos de popularidad se equivoca en promedio
+Canciones con error <= 10 puntos,sin ceros / test sin ceros,68.32,%,"De cada 100 canciones, cuantas se predicen con error pequeno"
+Exitos capturados en el top 20% del modelo,sin ceros / test sin ceros,59.6,%,"De las 20% de canciones que el modelo pone primero, que % son exitos reales (20% al azar)"
+Mejora sobre el azar (lift),sin ceros / test sin ceros,2.98,veces,Cuantas veces mejor que elegir al azar
+Error promedio (MAE),sin ceros / test completo,10.45,puntos (0-100),Cuantos puntos de popularidad se equivoca en promedio
+Canciones con error <= 10 puntos,sin ceros / test completo,64.77,%,"De cada 100 canciones, cuantas se predicen con error pequeno"
+Exitos capturados en el top 20% del modelo,sin ceros / test completo,58.14,%,"De las 20% de canciones que el modelo pone primero, que % son exitos reales (20% al azar)"
+Mejora sobre el azar (lift),sin ceros / test completo,2.91,veces,Cuantas veces mejor que elegir al azar

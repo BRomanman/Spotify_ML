@@ -1,0 +1,5 @@
+modelo,variables,MAE,RMSE,R2
+Regresion Lineal,Solo audio,15.273,18.761,0.062
+Regresion Lineal,Audio + género,10.584,15.056,0.396
+Random Forest,Solo audio,13.987,17.723,0.163
+Random Forest,Audio + género,10.315,14.712,0.423

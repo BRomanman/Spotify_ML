@@ -1,355 +1,95 @@
-# Spotify ML - EVA 2
+# Spotify ML - EP2 (Caso C: Spotify Tracks)
 
-Proyecto de Machine Learning desarrollado para la evaluacion EVA 2, utilizando un dataset de canciones de Spotify.
+Proyecto de Machine Learning (MLY1101) que predice la popularidad de canciones de Spotify (regresión) y descubre
+segmentos de canciones (K-Means). Integrantes: Bastián Román, Sebastián Aird, Vicente Contreras e Ignacio Gómez.
 
-El proyecto contempla las etapas de exploracion de datos, preprocesamiento, modelizacion supervisada y no supervisada, evaluacion de modelos y generacion de resultados.
+## Resumen de resultados
 
----
+| Tema | Resultado |
+|---|---|
+| Datos | 114.000 filas → **80.932 canciones únicas** (train 64.745 / test 16.187) |
+| Canciones con popularidad 0 | 14,1% en el CSV original; **6,7%** tras eliminar duplicados |
+| Random Forest (con ceros) | R² 0,42 · error medio 10,3 puntos · 64% de las canciones con error ≤ 10 puntos |
+| Random Forest (sin ceros, evaluado sin ceros) | R² 0,52 · error medio 8,7 puntos |
+| Regresión Lineal (línea base) | R² 0,40 con ceros · 0,50 sin ceros: casi iguala al Random Forest |
+| Multi-hot de géneros | Mejora un poco el Random Forest (R² 0,45 con ceros; 0,54 sin ceros) |
+| Uso práctico | Revisando el 20% mejor puntuado se captura el 54–60% de los éxitos (el azar daría 20%) |
+| K-Means | K=5 por interpretabilidad (silhouette 0,161; K=3 es el mejor estadísticamente: 0,257) |
 
-## Objetivo
+Detalle completo, limitaciones y sesgos en `Informe_Tecnico_EP2_Spotify.md`.
 
-Analizar un conjunto de datos de canciones de Spotify para identificar patrones y relaciones entre sus caracteristicas, utilizando tecnicas de Machine Learning.
-
-El proyecto busca aplicar un flujo completo de trabajo de Ciencia de Datos, desde la carga y exploracion de los datos hasta la construccion y evaluacion de modelos.
-
----
-
-## Dataset
-
-El dataset utilizado contiene informacion sobre canciones de Spotify y sus caracteristicas.
-
-Entre las variables disponibles se encuentran:
-
-- `popularity`
-- `duration_ms`
-- `explicit`
-- `danceability`
-- `energy`
-- `key`
-- `loudness`
-- `mode`
-- `speechiness`
-- `acousticness`
-- `instrumentalness`
-- `liveness`
-- `valence`
-- `tempo`
-- `track_genre`
-
-El dataset original se encuentra en:
+## Estructura
 
 ```text
-Data/Raw/Spotify_Tracks_Dataset.csv
-
-Los datos procesados se almacenan en:
-
-Data/Processed/Train/train.csv
-Data/Processed/Test/test.csv
-
-Estructura del proyecto
-
-Spotify_eva2/
-│
+Spotify_ML/Spotify_ML_eva2/
 ├── Data/
-│   ├── Raw/
-│   │   └── Spotify_Tracks_Dataset.csv
-│   │
-│   └── Processed/
-│       ├── Train/
-│       │   └── train.csv
-│       └── Test/
-│           └── test.csv
-│
-├── Notebook/
-│   └── Exploracion_inicial/
-│       ├── 1_EDA.ipynb
-│       └── 2_Modelizacion.ipynb
-│
+│   ├── Raw/Spotify_Tracks_Dataset.csv
+│   └── Processed/{Train/train.csv, Test/test.csv}
+├── Notebook/Exploracion_inicial/
+│   ├── 1_EDA.ipynb
+│   └── 2_Modelizacion.ipynb
 ├── src/
-│   ├── preprocess.py
-│   ├── grafico.py
-│   ├── metrica.py
-│   ├── train.py
-│   └── test.py
-│
+│   ├── preprocess.py   # deduplicado, limpieza, split, preprocesador
+│   ├── train.py        # modelos, entrenamiento y persistencia
+│   ├── test.py         # evaluación de modelos guardados
+│   ├── metrica.py      # métricas y KPIs de negocio
+│   └── grafico.py      # gráficos (matplotlib)
 ├── output/
-│   ├── Graficos/
-│   └── Modelos/
-│
-├── Docs/
-│   ├── estructura_inicial.md
-│   ├── 1_EDA.md
-│   └── 2_modelos.md
-│
-├── Environment/
-│   ├── main.md
-│   └── requirements.txt
-│
+│   ├── Graficos/       # PNG usados en el informe y la presentación
+│   ├── Modelos/        # métricas, KPIs, clusters y 4 modelos .joblib
+│   └── Tablas/         # tablas CSV de respaldo del EDA y la modelización
+├── Docs/               # 1_EDA.md, 2_modelos.md
+├── Environment/requirements.txt
 ├── Informe_Tecnico_EP2_Spotify.md
-│
-├── .gitignore
 └── README.md
+```
 
-El informe tecnico (`Informe_Tecnico_EP2_Spotify.md`) es el entregable principal de la EP2: documenta,
-en un solo archivo Markdown reproducible, el problema de negocio, objetivos, KPIs, fuentes de datos,
-preparacion/EDA, modelado (supervisado y no supervisado), evaluacion/interpretacion de resultados,
-etica y la metodologia CRISP-DM aplicada.
+## Notebooks
 
-Flujo del proyecto
+1. **`1_EDA.ipynb`**: carga, calidad, duplicados, preparación (una fila por canción), distribución de popularidad,
+   comparación de las canciones con popularidad 0 contra el resto (audio y género), correlaciones con y sin ceros,
+   división train/test.
+2. **`2_Modelizacion.ipynb`**: Regresión Lineal y Random Forest entrenados con y sin ceros y evaluados en 4 escenarios,
+   gráfico real vs. predicho y diagnóstico de la línea horizontal, aporte del género, KPIs de negocio y uso para
+   Spotify, persistencia de modelos, variante multi-hot de géneros, K-Means (con y sin ceros) y PCA.
+   Incluye diagramas de cajas (ceros vs. resto, géneros y clusters).
 
-El proyecto sigue el siguiente flujo:
+Cada notebook se entrega ejecutado, con sus resultados visibles.
 
-Dataset original
-      |
-      v
-Data/Raw
-      |
-      v
-Preprocesamiento
-      |
-      v
-Data/Processed
-      |
-      +----------+
-      |          |
-      v          v
-    Train       Test
-      |          |
-      +----+-----+
-           |
-           v
-      Modelizacion
-           |
-           +----------------+
-           |                |
-           v                v
-      Modelos             Clustering
-    supervisados        no supervisado
-           |                |
-           +-------+--------+
-                   |
-                   v
-              Evaluacion
-                   |
-                   v
-               Resultados
+## Decisiones importantes
 
-Notebooks
-1. EDA
+- **Una fila por canción** antes de dividir train/test, en tres pasos (mismo `track_id`, mismo audio con otro
+  `track_id`, mismo título + artista). Así una canción no puede estar a la vez en train y test (fuga de datos).
+- **Los ceros se analizan aparte**: todos los gráficos comparativos usan naranjo = con ceros y azul = sin ceros.
+  La marca `es_cero` se calcula dentro de los notebooks y no se guarda en los CSV (sería una copia del objetivo).
+- **Variables numéricas estandarizadas** (necesario para la Regresión Lineal; sin ello daba R² ≈ 0,01 por mala convergencia del ajuste).
+- **Random Forest** con `max_depth=None, min_samples_leaf=10, max_features=0.33`: la configuración anterior
+  (`max_depth=15`) producía una línea horizontal en el gráfico real vs. predicho porque los árboles gastaban su
+  profundidad separando géneros (113 columnas one-hot).
 
-Archivo:
+## Artefactos en `output/`
 
-Notebook/Exploracion_inicial/1_EDA.ipynb
-
-En este notebook se realiza la exploracion inicial del dataset.
-
-Se consideran actividades como:
-
-    Carga de datos.
-
-    Revision de dimensiones.
-
-    Revision de tipos de datos.
-
-    Identificacion de valores faltantes.
-
-    Analisis estadistico.
-
-    Analisis de variables.
-
-    Visualizaciones.
-
-    Identificacion de patrones y relaciones.
-
-El dataset tiene 24.259 `track_id` repetidos (21.3%) porque una misma cancion puede pertenecer a varios
-generos. La preparacion deja una sola fila por cancion para evitar fuga de datos entre train y test; la
-justificacion completa de este criterio esta documentada en la seccion 8.1 del propio notebook.
-
-2. Modelizacion
-
-Archivo:
-
-Notebook/Exploracion_inicial/2_Modelizacion.ipynb
-
-En este notebook se desarrolla la etapa de Machine Learning.
-
-Se consideran:
-
-    Preparacion de los datos.
-
-    Separacion de datos de entrenamiento y prueba.
-
-    Transformacion de variables.
-
-    Modelos supervisados.
-
-    Modelos no supervisados.
-
-    Clustering.
-
-    Reduccion de dimensionalidad.
-
-    Evaluacion de resultados.
-
-Se comparan 2 modelos supervisados de regresion (Regresion Lineal y Random Forest) y se aplica K-Means
-como tecnica no supervisada. El numero de clusters (K=5) se valida cuantitativamente con silhouette score:
-el score favorece K=3 (0.251) por sobre K=5 (0.166), pero se mantiene K=5 por interpretabilidad de negocio
-(clusters mas diferenciables); el detalle de esta decision esta en el notebook y en el informe tecnico.
-Los modelos entrenados quedan persistidos en `output/Modelos/*.joblib` para su reutilizacion.
-
-Codigo fuente
-
-La carpeta src contiene las funciones utilizadas durante el proyecto.
-preprocess.py
-
-Contiene funciones relacionadas con:
-
-    Limpieza de datos.
-
-    Preparacion del dataset.
-
-    Transformacion de variables.
-
-    Separacion de datos.
-
-    Guardado de datasets procesados.
-
-grafico.py
-
-Contiene funciones utilizadas para generar graficos y visualizaciones.
-
-Los resultados pueden almacenarse en:
-
-output/Graficos/
-
-metrica.py
-
-Contiene funciones relacionadas con las metricas utilizadas para evaluar los modelos.
-train.py
-
-Contiene funciones y procesos relacionados con el entrenamiento de modelos.
-test.py
-
-Contiene funciones y procesos relacionados con la evaluacion de los modelos utilizando datos de prueba.
-Resultados
-
-Los resultados generados durante el proyecto se almacenan en:
-
-output/
-├── Graficos/
-└── Modelos/
-
-Los graficos generados se guardan en:
-
-output/Graficos/
-
-Los modelos entrenados se guardan en:
-
+```text
 output/Modelos/
-├── regresion_lineal.joblib
-├── random_forest.joblib
-├── metricas_modelos.csv
-├── perfil_clusters.csv
-└── silhouette_scores.csv
+├── regresion_lineal_con_ceros.joblib   regresion_lineal_sin_ceros.joblib
+├── random_forest_con_ceros.joblib      random_forest_sin_ceros.joblib
+├── metricas_modelos.csv  kpis_negocio.csv  perfil_clusters.csv
+└── silhouette_scores.csv  generos_por_cluster.csv
+```
 
-Tecnologias utilizadas
+Los `.joblib` dependen de la versión de scikit-learn con que se guardaron (1.9.1). Si se cargan con otra versión,
+conviene volver a ejecutar `2_Modelizacion.ipynb` (Run All; cada Random Forest tarda ~1 minuto).
 
-    Python
+## Instalación y ejecución
 
-    Pandas
+Python 3.12. El README está en la raíz del repositorio; el proyecto vive en la carpeta `Spotify_ML_eva2/`.
 
-    NumPy
-
-    Scikit-learn
-
-    SciPy
-
-    Matplotlib
-
-    Seaborn
-
-    Jupyter Notebook
-
-    VS Code
-
-    Git
-
-    GitHub
-
-Requisitos
-
-Se utiliza Python 3.12.
-
-Las dependencias del proyecto se encuentran en:
-
-Environment/requirements.txt
-
-Instalacion
-
-Clonar el repositorio:
-
-git clone URL_DEL_REPOSITORIO
-
-Entrar al proyecto:
-
-cd Spotify_eva2
-
-Crear el entorno virtual:
-
+```bash
 python -m venv .venv
-
-Instalar las dependencias:
-
 .venv\Scripts\python.exe -m pip install -r Environment\requirements.txt
+```
 
-Ejecucion
+Abrir el proyecto en VS Code, seleccionar `.venv\Scripts\python.exe` como intérprete y ejecutar en orden
+`1_EDA.ipynb` y luego `2_Modelizacion.ipynb`.
 
-Una vez instaladas las dependencias, abrir el proyecto en VS Code.
-
-Seleccionar como interprete de Python:
-
-.venv\Scripts\python.exe
-
-Luego ejecutar los notebooks en el siguiente orden:
-Paso 1
-
-Notebook/Exploracion_inicial/1_EDA.ipynb
-
-Paso 2
-
-Notebook/Exploracion_inicial/2_Modelizacion.ipynb
-
-Organizacion del proyecto
-
-El proyecto separa los datos, notebooks, codigo fuente, resultados y documentacion para facilitar el mantenimiento y la reproduccion del trabajo.
-
-La estructura permite diferenciar:
-
-    Datos originales.
-
-    Datos procesados.
-
-    Exploracion de datos.
-
-    Modelizacion.
-
-    Codigo reutilizable.
-
-    Resultados.
-
-    Documentacion.
-
-    Dependencias del proyecto.
-
-Autores
-
-Bastian Roman
-Sebastian Aird
-Vicente Contreras
-Ignacio Gomez
-
-Proyecto desarrollado para la asignatura de Ciencia de Datos / Machine Learning.
-
-Duoc UC
-
-EVA 2 - Machine Learning
+Duoc UC · MLY1101 Machine Learning · EP2

@@ -1,0 +1,5 @@
+paso,filas,ceros,pct_ceros
+Dataset original,114000,16020,14.05
+Sin track_id repetido,89741,9448,10.53
+Sin audio idéntico (otro track_id),83479,5598,6.71
+Sin título+artista repetido,80932,5425,6.7
