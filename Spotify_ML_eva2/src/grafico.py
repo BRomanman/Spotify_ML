@@ -316,7 +316,7 @@ def plot_diagnostico_linea(y, p_ini, p_fin, share_ini, value_ini, share_fin, pat
     ax.set_xlabel("Popularidad predicha"); ax.set_ylabel("Canciones")
     ax.yaxis.set_major_formatter(lambda v, _: _n(v))
     ax.legend(handles=[Patch(color=C_INICIAL, alpha=0.6, label=f"Inicial: pico de {_d(share_ini * 100, 0)}% en un valor"),
-                       Patch(color=C_RESTO, alpha=0.6, label=f"Corregido: máximo {_d(share_fin * 100, 1)}% en un valor")], loc="upper right")
+                       Patch(color=C_RESTO, alpha=0.6, label=f"Corregido: máximo {_d(share_fin * 100, 1)}% en un valor")], loc="upper left")
     axes[0].set_xlabel("Popularidad real"); axes[1].set_xlabel("Popularidad real")
     fig.tight_layout(); p = _save(fig, path); plt.close(fig); return p
 
