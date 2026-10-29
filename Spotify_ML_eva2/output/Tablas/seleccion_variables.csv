@@ -1,0 +1,15 @@
+,coef_con_ceros,p_con_ceros,coef_sin_ceros,p_sin_ceros,efecto_min,decision,motivo
+instrumentalness,-3.355,0.0,-3.824,0.0,3.36,se conserva,
+speechiness,-2.07,0.0,-2.347,0.0,2.07,se conserva,
+valence,-1.836,0.0,-1.868,0.0,1.84,se conserva,
+energy,-1.546,0.0,-1.823,0.0,1.55,se conserva,
+danceability,1.745,0.0,1.477,0.0,1.48,se conserva,
+explicit,1.275,0.0,1.386,0.0,1.27,se conserva,
+loudness,1.089,0.0,0.999,0.0,1.0,se descarta,repetida con energy
+duration_ms,-0.869,0.0,-0.962,0.0,0.87,se conserva,
+acousticness,-0.581,0.0,-0.285,0.003,0.28,se descarta,"efecto menor a 0,5"
+time_signature,0.27,0.0,0.21,0.001,0.21,se descarta,"efecto menor a 0,5"
+mode,-0.178,0.009,-0.34,0.0,0.18,se descarta,"efecto menor a 0,5"
+key,0.065,0.333,0.059,0.344,0.06,se descarta,"efecto menor a 0,5"
+tempo,0.062,0.373,-0.174,0.007,0.06,se descarta,"efecto menor a 0,5"
+liveness,0.009,0.899,-0.354,0.0,0.01,se descarta,"efecto menor a 0,5"

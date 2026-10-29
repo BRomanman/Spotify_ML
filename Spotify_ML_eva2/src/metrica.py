@@ -50,3 +50,30 @@ def business_kpis(y_true, y_pred, top_frac=0.20, hit_frac=0.20, tolerance=10):
         "precision_top": precision * 100,
         "lift_top": precision / hit_frac,
     }
+
+
+def ols_estandarizado(df, cols, target="popularity"):
+    """Regresion lineal (minimos cuadrados, OLS) con las variables ESTANDARIZADAS.
+
+    Cada coeficiente dice cuantos puntos de popularidad cambia la cancion cuando esa variable sube una
+    desviacion estandar (todo lo demas igual), asi los coeficientes son comparables entre variables.
+    Devuelve (tabla, R2, n) con coef, ic_inf/ic_sup (intervalo de confianza al 95%), t y p-value.
+    """
+    from scipy import stats
+    X = df[cols].astype(float)
+    X = (X - X.mean()) / X.std()
+    X.insert(0, "const", 1.0)
+    y = df[target].to_numpy(dtype=float)
+    A = X.to_numpy()
+    beta = np.linalg.lstsq(A, y, rcond=None)[0]
+    res = y - A @ beta
+    n, k = A.shape
+    sigma2 = res @ res / (n - k)
+    se = np.sqrt(np.diag(sigma2 * np.linalg.inv(A.T @ A)))
+    t = beta / se
+    p = 2 * stats.t.sf(np.abs(t), n - k)
+    z = stats.t.ppf(0.975, n - k)
+    tabla = pd.DataFrame({"coef": beta, "ic_inf": beta - z * se, "ic_sup": beta + z * se, "t": t, "p_value": p},
+                         index=X.columns).drop(index="const")
+    r2 = 1 - (res @ res) / ((y - y.mean()) @ (y - y.mean()))
+    return tabla, float(r2), int(n)

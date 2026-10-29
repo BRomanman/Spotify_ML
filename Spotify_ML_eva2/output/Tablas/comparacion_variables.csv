@@ -1,0 +1,9 @@
+modelo,variables,MAE,RMSE,R2
+Random Forest,14 variables + género,10.315,14.712,0.423
+Random Forest,7 variables + género,10.278,14.715,0.423
+Random Forest,Solo 14 variables de audio,13.987,17.723,0.163
+Random Forest,Solo 7 variables de audio,14.299,18.005,0.136
+Regresion Lineal,14 variables + género,10.584,15.056,0.396
+Regresion Lineal,7 variables + género,10.593,15.072,0.395
+Regresion Lineal,Solo 14 variables de audio,15.273,18.761,0.062
+Regresion Lineal,Solo 7 variables de audio,15.288,18.773,0.061

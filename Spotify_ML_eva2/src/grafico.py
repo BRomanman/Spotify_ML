@@ -509,6 +509,84 @@ def plot_multihot(comp, path):
 
 
 # Compatibilidad con versiones anteriores del proyecto
+# --------------------------------------------------------------------------------------
+# Seleccion de variables: correlacion entre variables, OLS y cajas con medianas distintas
+# --------------------------------------------------------------------------------------
+def plot_correlacion_variables(corr, path, umbral=0.7):
+    """Matriz de correlacion entre variables (triangulo inferior). Marca con borde las parejas |r| >= umbral:
+    dos variables casi iguales aportan la misma informacion, basta con una."""
+    cols = list(corr.columns)
+    n = len(cols)
+    fig, ax = plt.subplots(figsize=(10.5, 8.6))
+    vals = corr.to_numpy().copy()
+    mask = np.triu(np.ones_like(vals, dtype=bool), k=1)
+    im = ax.imshow(np.ma.array(vals, mask=mask), cmap="RdBu_r", vmin=-1, vmax=1)
+    for i in range(n):
+        for j in range(i + 1):
+            v = vals[i, j]
+            ax.text(j, i, _d(v, 2), ha="center", va="center", fontsize=8.5,
+                    color="white" if abs(v) > 0.6 else INK, fontweight="bold" if (abs(v) >= umbral and i != j) else "normal")
+            if abs(v) >= umbral and i != j:
+                ax.add_patch(plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False, edgecolor=INK, linewidth=2))
+    ax.set_xticks(range(n)); ax.set_xticklabels(cols, rotation=45, ha="right")
+    ax.set_yticks(range(n)); ax.set_yticklabels(cols)
+    ax.grid(False); ax.spines[:].set_visible(False)
+    cb = fig.colorbar(im, ax=ax, shrink=0.75, pad=0.02); cb.outline.set_visible(False)
+    ax.set_title(f"Variables muy parecidas entre sí (borde negro: |r| ≥ {_d(umbral, 1)})")
+    fig.tight_layout(); p = _save(fig, path); plt.close(fig); return p
+
+
+def plot_ols_coeficientes(tabla, conservar, path, umbral=0.5):
+    """Coeficientes del OLS estandarizado con su intervalo de confianza al 95%: cuantos puntos de popularidad
+    cambia la cancion al subir cada variable una desviacion estandar. Azul = se conserva, gris = se descarta."""
+    t = tabla.reindex(tabla["coef"].abs().sort_values().index)
+    fig, ax = plt.subplots(figsize=(10, 0.46 * len(t) + 1.8))
+    y = np.arange(len(t))
+    colores = [C_RESTO if v in conservar else C_UNO for v in t.index]
+    ax.barh(y, t["coef"], color=colores, height=0.62)
+    ax.errorbar(t["coef"], y, xerr=[t["coef"] - t["ic_inf"], t["ic_sup"] - t["coef"]], fmt="none", ecolor=INK, elinewidth=1.1, capsize=3)
+    for yi, (v, lo, hi) in enumerate(zip(t["coef"], t["ic_inf"], t["ic_sup"])):
+        x = hi + 0.06 if v >= 0 else lo - 0.06
+        ax.text(x, yi, ("+" if v > 0 else "−") + _d(abs(v), 1), va="center", ha="left" if v >= 0 else "right", fontsize=10, color=INK)
+    ax.axvline(0, color=INK, linewidth=1)
+    ax.axvspan(-umbral, umbral, color=GRID, alpha=0.45, zorder=0)
+    ax.set_yticks(y); ax.set_yticklabels(t.index); ax.grid(axis="y", visible=False)
+    ax.set_xlabel("Puntos de popularidad que cambia al subir la variable una desviación estándar")
+    ax.set_title("Regresión lineal (OLS): cuánto pesa cada variable")
+    ax.legend(handles=[Patch(facecolor=C_RESTO, label="Se conserva"), Patch(facecolor=C_UNO, label="Se descarta (efecto menor a 0,5 puntos o repetida)"),
+                       Patch(facecolor=GRID, alpha=0.45, label="Zona de efecto casi nulo")], loc="upper center", bbox_to_anchor=(0.45, -0.12), ncol=3, fontsize=9.5, frameon=False)
+    ax.margins(x=0.12)
+    fig.tight_layout(); p = _save(fig, path); plt.close(fig); return p
+
+
+def plot_cajas_grupos(groups, labels, path, title, xlabel, horizontal=True, color=None, figsize=None, whis=(5, 95)):
+    """Diagrama de cajas simple (una caja por grupo) con la mediana escrita. `groups` = lista de series."""
+    color = color or C_RESTO
+    n = len(groups)
+    fig, ax = plt.subplots(figsize=figsize or ((9.5, 0.5 * n + 1.8) if horizontal else (6.5, 5)))
+    bp = ax.boxplot(groups, vert=not horizontal, widths=0.58, patch_artist=True, showfliers=False, whis=whis)
+    for box in bp["boxes"]:
+        box.set(facecolor=color, edgecolor=color, alpha=0.55, linewidth=1.5)
+    for line in bp["whiskers"] + bp["caps"]:
+        line.set(color=color, linewidth=1.3)
+    for med in bp["medians"]:
+        med.set(color=INK, linewidth=2.2)
+    for k, g in enumerate(groups):
+        m = float(np.median(g)); q3 = float(np.quantile(g, 0.75))
+        if horizontal:
+            ax.text(float(np.quantile(g, 0.95)) + 1.2, k + 1, f"mediana {_d(m, 0)}", va="center", fontsize=10, color=INK, fontweight="bold")
+        else:
+            ax.text(k + 1, float(np.quantile(g, 0.95)) + 1.5, f"mediana {_d(m, 0)}", ha="center", fontsize=10.5, color=INK, fontweight="bold")
+    if horizontal:
+        ax.set_yticks(range(1, n + 1)); ax.set_yticklabels(labels); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
+        ax.set_xlabel(xlabel); ax.set_xlim(-2, 112)
+    else:
+        ax.set_xticks(range(1, n + 1)); ax.set_xticklabels(labels); ax.grid(axis="x", visible=False)
+        ax.set_ylabel(xlabel); ax.set_ylim(-2, 112)
+    ax.set_title(title)
+    fig.tight_layout(); p = _save(fig, path); plt.close(fig); return p
+
+
 def save_metrics_plot(results, path):
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     for ax, m in zip(axes, ["MAE", "RMSE", "R2"]):

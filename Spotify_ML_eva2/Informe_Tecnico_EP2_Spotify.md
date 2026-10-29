@@ -19,6 +19,7 @@ y `Notebook/Exploracion_inicial/2_Modelizacion.ipynb` sobre `Data/Raw/Spotify_Tr
 4. **Se detectó y eliminó una fuga de datos adicional**: la misma grabación publicada con distintos `track_id` quedaba en train y en test (sección 5.1).
 5. **Se corrigió la Regresión Lineal**: en una versión anterior le faltaba estandarizar las variables numéricas y daba R² ≈ 0,01; bien configurada llega a R² ≈ 0,40 (sección 6.1).
 6. **Se probó la variante multi-hot de géneros** propuesta por el profesor (sección 6.4) y se agregaron **diagramas de cajas** a los gráficos de los ceros, los géneros y los clusters.
+7. **Se seleccionaron las variables con criterios estadísticos** (sección 5.5): la correlación entre variables y la regresión lineal estandarizada permiten reducir a **7 de las 14 variables**, y los gráficos se limitan a comparaciones donde las medianas se separan de verdad. Con esas 7 el modelo rinde igual (sección 6.3).
 
 ---
 
@@ -152,7 +153,17 @@ algunas correlaciones (speechiness −0,065 → −0,089; energy −0,002 → �
 hallazgo del EP1 se mantiene: el sonido por sí solo se asocia poco con la popularidad. Gráfico:
 `correlacion_popularidad.png`.
 
-### 5.5 Preparación aplicada antes del modelamiento
+### 5.5 Selección de variables
+
+Para no mostrar comparaciones sin diferencias reales se aplicaron tres criterios sobre las 80.932 canciones:
+
+1. **Correlación entre variables.** Si dos variables son casi iguales (|r| ≥ 0,7) aportan la misma información y basta con una. Solo dos parejas superan ese umbral; el resto de las variables son bastante independientes entre sí. Gráfico: `correlacion_variables.png`.
+2. **Regresión lineal (OLS) con variables estandarizadas.** El coeficiente indica cuántos puntos de popularidad cambia una canción al subir la variable una desviación estándar. Con n = 80.932 casi todos los p-values son menores a 0,05, por lo que se evalúa el **tamaño del efecto** (se considera sin efecto relevante si es menor a 0,5 puntos con o sin ceros, o si está repetida con otra de mayor efecto). Gráfico: `ols_coeficientes.png`; tablas: `ols_coeficientes.csv`, `seleccion_variables.csv`.
+3. **Diagramas de cajas solo donde las medianas difieren.** Una comparación con medianas casi iguales no distingue nada, por lo que no se grafica (`rango_medianas_cuartiles.csv`). Las que sí se separan: el género (medianas de 6 a 75 sin ceros) e `instrumentalness` (de 40 a 26). Gráficos: `cajas_genero_extremos.png`, `cajas_instrumentalness.png`.
+
+**Qué se puede definir con esto:** solo 7 de las 14 variables tienen un efecto relevante; las demás se pueden dejar fuera sin perder información (sección 6.3 lo comprueba con el modelo). **Advertencia:** con solo audio el R² de la regresión es 0,06 (con ceros) y 0,08 (sin ceros); el audio explica poco incluso con las variables que sí pesan.
+
+### 5.6 Preparación aplicada antes del modelamiento
 
 1. Eliminación de columnas no predictivas (`Unnamed: 0`, `track_id`, `track_name`, `album_name`, `artists`).
 2. Deduplicado a una fila por canción en tres pasos (sección 5.1).
@@ -217,6 +228,11 @@ Sin la columna de género (solo audio), el Random Forest obtiene **R² = 0,16** 
 el 57% de la importancia. El sonido por sí solo explica poco de la popularidad; lo que más ayuda es saber en qué
 género está la canción. Que la lineal llegue casi al nivel del Random Forest indica que el efecto del género es
 sobre todo aditivo; el Random Forest saca más del audio (0,16 vs. 0,06), pero su aporte total es pequeño.
+
+**¿Alcanzan 7 variables?** Con las 7 variables seleccionadas (sección 5.5) y el género, el R² es **0,423** en el Random Forest
+(igual que con 14) y **0,395** en la Regresión Lineal (0,396 con 14). Sin el género, el Random Forest baja de 0,163 a 0,136
+(la Regresión Lineal queda en 0,061 contra 0,062): las variables débiles aportan un poco en conjunto cuando falta el género.
+Tabla: `comparacion_variables.csv`; notebook `2_Modelizacion.ipynb`, sección 2.10. Los modelos guardados siguen usando las 14 variables.
 
 ### 6.4 Variante multi-hot: conservar todos los géneros de cada canción
 
@@ -304,7 +320,7 @@ Gráficos: `clusters_pca.png`, `clusters_ceros.png`, `cajas_popularidad_cluster.
 |---|---|
 | 1. Comprensión del negocio | Completado — problema, objetivos y KPIs técnicos y de negocio (secciones 1-3) |
 | 2. Comprensión de los datos | Completado — fuente, calidad, duplicados y análisis de los ceros (`1_EDA.ipynb`, secciones 4-5) |
-| 3. Preparación de los datos | Completado — deduplicado en tres pasos, codificación, split train/test sin fuga (sección 5.5) |
+| 3. Preparación de los datos | Completado — deduplicado en tres pasos, codificación, split train/test sin fuga (sección 5.6) |
 | 4. Modelado | Completado — 2 modelos supervisados (con y sin ceros), variante multi-hot y K-Means (sección 6) |
 | 5. Evaluación | Completado — MAE/RMSE/R², KPIs de negocio, silhouette, diagnóstico de la línea horizontal, interpretación (secciones 6-7) |
 | 6. Despliegue | Fuera del alcance; se propone un esquema en dos etapas como siguiente paso |

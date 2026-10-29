@@ -1,0 +1,8 @@
+comparacion,dif_medianas
+género (6 menores vs 6 mayores),52.5
+"instrumentalness (con voz vs más de 0,5)",14.0
+speechiness (cuartil bajo vs alto),-8.0
+valence (cuartil bajo vs alto),-2.0
+energy (cuartil bajo vs alto),-6.5
+danceability (cuartil bajo vs alto),7.0
+duration_ms (cuartil bajo vs alto),-1.0
